@@ -28,6 +28,14 @@ const baloo = Baloo_2({
 export const metadata: Metadata = {
   title: "Cheshire Bookkeeping CRM",
   description: "Client and prospect management for Cheshire Bookkeeping.",
+  icons: {
+    icon: [
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({
