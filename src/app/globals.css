@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --surface: #f7f7f8;
+  --elevated: #ffffff;
+  --border: #e6e6ea;
+  --foreground: #1c1c1c;
+  --muted: #5c5c66;
+  --primary: #8e6ca8;
+  --primary-hover: #79588f;
+  --primary-foreground: #ffffff;
+  --primary-soft: rgba(142, 108, 168, 0.1);
+  --accent: #3fa89b;
+  --accent-soft: rgba(63, 168, 155, 0.1);
+  --success: #3fa89b;
+  --warning: #c9883e;
+  --danger: #c8553d;
+  --ring: #8e6ca8;
+}
+
+.dark {
+  --background: #121214;
+  --surface: #1c1c20;
+  --elevated: #26262c;
+  --border: #33333b;
+  --foreground: #f2f2f4;
+  --muted: #a2a2ae;
+  --primary: #b79bd0;
+  --primary-hover: #c9b3dd;
+  --primary-foreground: #1c1c1c;
+  --primary-soft: rgba(183, 155, 208, 0.14);
+  --accent: #6fc7ba;
+  --accent-soft: rgba(111, 199, 186, 0.14);
+  --success: #6fc7ba;
+  --warning: #e0a75c;
+  --danger: #e07a66;
+  --ring: #b79bd0;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Smooth theme transition */
+body,
+body * {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
