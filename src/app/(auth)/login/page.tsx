@@ -43,7 +43,7 @@ export default function LoginPage() {
     <div className="grid min-h-screen lg:grid-cols-[1.1fr_1fr]">
       {/* ---------- Brand panel ---------- */}
       <aside
-        className="relative hidden flex-col justify-between overflow-hidden p-12 lg:flex"
+        className="relative hidden flex-col overflow-hidden p-12 lg:flex"
         style={{
           background:
             "linear-gradient(140deg,#f4eefb 0%,#eaf6f3 55%,#f3eaf9 100%)",
@@ -59,23 +59,18 @@ export default function LoginPage() {
           style={{ background: LILAC }}
         />
 
-        {/* logo */}
-        <div className="relative flex items-center gap-3">
-          <Logo size={56} priority />
-          <div className="font-brand text-lg font-bold leading-none text-[#1c1c1c]">
-            Cheshire
-            <span className="mt-0.5 block text-[9px] font-semibold tracking-[3px] text-[#6b6b76]">
-              BOOKKEEPING
-            </span>
-          </div>
-        </div>
+        {/* logo — front and centre */}
+        <div className="relative flex flex-1 flex-col items-center justify-center text-center">
+          <Logo
+            size={300}
+            priority
+            className="mb-8 drop-shadow-[0_12px_32px_rgba(0,0,0,0.10)]"
+          />
 
-        {/* hero */}
-        <div className="relative max-w-md">
-          <p className="mb-4 text-[12px] font-semibold uppercase tracking-[2px] text-[#6b6b76]">
+          <p className="mb-3 text-[12px] font-semibold uppercase tracking-[2px] text-[#6b6b76]">
             Client Relationship Manager
           </p>
-          <h1 className="font-brand text-5xl font-bold leading-[1.15] text-[#1c1c1c]">
+          <h1 className="font-brand text-4xl font-bold leading-[1.15] text-[#1c1c1c]">
             Welcome{" "}
             <span
               className="inline-block -rotate-2 rounded-xl px-3 py-0.5 text-[#1c1c1c]"
@@ -84,12 +79,12 @@ export default function LoginPage() {
               back
             </span>
           </h1>
-          <p className="mt-5 text-[15px] leading-relaxed text-[#4a4a55]">
+          <p className="mx-auto mt-4 max-w-sm text-[15px] leading-relaxed text-[#4a4a55]">
             Your clients, prospects and Companies House data — all in one calm,
             searchable place.
           </p>
 
-          <div className="mt-7 flex flex-wrap gap-2.5">
+          <div className="mt-7 flex flex-wrap justify-center gap-2.5">
             <Sticker color={TEAL}>Making Tax Digital</Sticker>
             <Sticker color={LILAC}>Xero Certified</Sticker>
             <Sticker color={TEAL}>Companies House synced</Sticker>
@@ -110,7 +105,7 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           {/* mobile brand header */}
           <div className="mb-8 flex flex-col items-center text-center lg:hidden">
-            <Logo size={88} priority />
+            <Logo size={140} priority />
           </div>
 
           <h2 className="font-brand text-2xl font-bold">Sign in</h2>

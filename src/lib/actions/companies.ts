@@ -159,3 +159,24 @@ export async function addActivity(
     return { ok: false, error: (e as Error).message };
   }
 }
+
+export async function updateCompanyStatus(
+  orgId: string,
+  status: CompanyStatus
+): Promise<{ ok: boolean; error?: string }> {
+  if (!configured())
+    return { ok: false, error: "Demo mode — connect Supabase to save." };
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("organizations")
+      .update({ status })
+      .eq("id", orgId);
+    if (error) return { ok: false, error: error.message };
+    revalidatePath(`/companies/${orgId}`);
+    revalidatePath("/companies");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}

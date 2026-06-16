@@ -13,14 +13,20 @@ import {
 } from "lucide-react";
 import {
   STATUS_META,
+  STATUS_FLOW,
   type Activity,
   type ActivityType,
+  type CompanyStatus,
   type Contact,
   type Note,
   type Organization,
 } from "@/lib/types";
 import { cn, formatDate, initials, timeAgo } from "@/lib/utils";
-import { addActivity, addNote } from "@/lib/actions/companies";
+import {
+  addActivity,
+  addNote,
+  updateCompanyStatus,
+} from "@/lib/actions/companies";
 
 const TABS = ["Overview", "Contacts", "Companies House", "Activities", "Notes"] as const;
 type Tab = (typeof TABS)[number];
@@ -40,7 +46,6 @@ export function CompanyDetail({
   const [tab, setTab] = useState<Tab>("Overview");
   const [refreshing, setRefreshing] = useState(false);
   const [syncMsg, setSyncMsg] = useState<string | null>(null);
-  const meta = STATUS_META[org.status];
 
   async function refreshFromCH() {
     if (!org.company_number) return;
@@ -75,15 +80,7 @@ export function CompanyDetail({
           <div>
             <h1 className="font-brand text-[22px] font-bold leading-tight">{org.name}</h1>
             <div className="mt-1.5 flex flex-wrap items-center gap-3 text-[13px] text-muted">
-              <span
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11.5px] font-semibold",
-                  meta.className
-                )}
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                {meta.label}
-              </span>
+              <StatusSelect orgId={org.id} value={org.status} />
               {org.town && <span>📍 {[org.town, org.county].filter(Boolean).join(", ")}</span>}
               {org.sector && <span>🏷 {org.sector}</span>}
             </div>
@@ -127,6 +124,54 @@ export function CompanyDetail({
         {tab === "Notes" && <Notes orgId={org.id} notes={notes} />}
       </div>
     </div>
+  );
+}
+
+function StatusSelect({
+  orgId,
+  value,
+}: {
+  orgId: string;
+  value: CompanyStatus;
+}) {
+  const router = useRouter();
+  const [val, setVal] = useState<CompanyStatus>(value);
+  const [saving, setSaving] = useState(false);
+  const meta = STATUS_META[val] ?? STATUS_META.prospect;
+
+  async function change(next: CompanyStatus) {
+    const prev = val;
+    setVal(next);
+    setSaving(true);
+    const res = await updateCompanyStatus(orgId, next);
+    setSaving(false);
+    if (res.ok) router.refresh();
+    else setVal(prev);
+  }
+
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11.5px] font-semibold",
+        meta.className,
+        saving && "opacity-60"
+      )}
+    >
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+      <select
+        value={val}
+        onChange={(e) => change(e.target.value as CompanyStatus)}
+        disabled={saving}
+        aria-label="Change status"
+        className="cursor-pointer appearance-none bg-transparent pr-0.5 text-[11.5px] font-semibold text-current outline-none"
+      >
+        {STATUS_FLOW.map((s) => (
+          <option key={s} value={s}>
+            {STATUS_META[s].label}
+          </option>
+        ))}
+      </select>
+    </span>
   );
 }
 

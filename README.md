@@ -41,8 +41,7 @@ SUPABASE_SERVICE_ROLE_KEY=...   # server-only
 Apply the schema (either option):
 
 - **Supabase CLI:** `supabase link --project-ref <ref>` then `supabase db push`
-- **SQL editor:** paste `supabase/migrations/0001_init.sql`, then `0002_rls.sql`, then
-  (optional demo data) `0003_seed.sql`, in order.
+- **SQL editor:** paste `supabase/setup.sql` (schema + RLS, no demo data) and Run.
 
 ### 2. Companies House  🔑
 
@@ -99,7 +98,7 @@ src/
     companies-house.ts
     demo-data.ts
     types.ts, utils.ts
-supabase/migrations/  # 0001 schema · 0002 RLS · 0003 seed
+supabase/migrations/  # 0001 schema · 0002 RLS (0003 seed intentionally empty — no demo data)
 ```
 
 ## Roles & security

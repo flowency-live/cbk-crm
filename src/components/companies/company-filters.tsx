@@ -7,9 +7,10 @@ import { cn } from "@/lib/utils";
 
 const STATUSES = [
   { key: "all", label: "All" },
-  { key: "client", label: "Clients" },
   { key: "prospect", label: "Prospects" },
-  { key: "dormant", label: "Dormant" },
+  { key: "active_lead", label: "Active Leads" },
+  { key: "client", label: "Clients" },
+  { key: "closed", label: "Closed" },
 ];
 
 export function CompanyFilters({
@@ -77,16 +78,19 @@ export function CompanyFilters({
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-1.5">
-        <Chip accent active={sector === "all"} onClick={() => setParam("sector", "all")}>
-          All sectors
-        </Chip>
+      <select
+        value={sector}
+        onChange={(e) => setParam("sector", e.target.value)}
+        aria-label="Filter by sector"
+        className="rounded-md border border-border bg-surface px-3 py-2 text-[13px] outline-none focus:border-primary"
+      >
+        <option value="all">All sectors</option>
         {sectors.map((s) => (
-          <Chip key={s} accent active={sector === s} onClick={() => setParam("sector", s)}>
+          <option key={s} value={s}>
             {s}
-          </Chip>
+          </option>
         ))}
-      </div>
+      </select>
 
       <span className="ml-auto whitespace-nowrap text-[12.5px] text-muted">
         {showing} compan{showing === 1 ? "y" : "ies"}

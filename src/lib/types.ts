@@ -1,7 +1,21 @@
 // Hand-maintained DB types. When the DB stabilises you can replace this with
 // `supabase gen types typescript` output for full type-safety.
 
-export type CompanyStatus = "prospect" | "client" | "dormant" | "lost";
+export type CompanyStatus =
+  | "prospect"
+  | "active_lead"
+  | "client"
+  | "closed"
+  | "dormant"
+  | "lost";
+
+/** The statuses surfaced in the UI, in pipeline order. */
+export const STATUS_FLOW: CompanyStatus[] = [
+  "prospect",
+  "active_lead",
+  "client",
+  "closed",
+];
 export type UserRole = "admin" | "staff" | "client" | "agent";
 export type ActivityType = "call" | "email" | "meeting" | "task" | "note";
 
@@ -94,8 +108,10 @@ export const STATUS_META: Record<
   CompanyStatus,
   { label: string; className: string }
 > = {
-  client: { label: "Client", className: "bg-accent-soft text-accent" },
   prospect: { label: "Prospect", className: "bg-primary-soft text-primary" },
+  active_lead: { label: "Active Lead", className: "bg-[#E0A75C26] text-warning" },
+  client: { label: "Client", className: "bg-accent-soft text-accent" },
+  closed: { label: "Closed", className: "bg-[#9993] text-muted" },
   dormant: { label: "Dormant", className: "bg-[#9993] text-muted" },
   lost: { label: "Lost", className: "bg-[#9993] text-muted" },
 };
