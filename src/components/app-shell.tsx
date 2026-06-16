@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./theme-toggle";
 import { CommandPalette } from "./command-palette";
 import { Logo } from "./logo";
+import { UserMenu } from "./user-menu";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -63,9 +64,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           >
             <Bell size={19} />
           </button>
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-            CB
-          </div>
+          <UserMenu />
         </div>
       </header>
 
