@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import type { CompanyStatus } from "@/lib/types";
+import type { ActivityType, CompanyStatus } from "@/lib/types";
 
 function configured() {
   return (
@@ -103,6 +103,58 @@ export async function createCompany(
 
     revalidatePath("/companies");
     return { ok: true, id: org.id };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
+export async function addNote(
+  orgId: string,
+  body: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!body.trim()) return { ok: false, error: "Note is empty." };
+  if (!configured())
+    return { ok: false, error: "Demo mode — connect Supabase to save." };
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { error } = await supabase.from("notes").insert({
+      org_id: orgId,
+      body: body.trim(),
+      created_by: user?.id ?? null,
+    });
+    if (error) return { ok: false, error: error.message };
+    revalidatePath(`/companies/${orgId}`);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
+export async function addActivity(
+  orgId: string,
+  input: { type: ActivityType; subject: string; body?: string }
+): Promise<{ ok: boolean; error?: string }> {
+  if (!input.subject.trim()) return { ok: false, error: "Subject is required." };
+  if (!configured())
+    return { ok: false, error: "Demo mode — connect Supabase to save." };
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { error } = await supabase.from("activities").insert({
+      org_id: orgId,
+      type: input.type,
+      subject: input.subject.trim(),
+      body: input.body?.trim() || null,
+      created_by: user?.id ?? null,
+    });
+    if (error) return { ok: false, error: error.message };
+    revalidatePath(`/companies/${orgId}`);
+    return { ok: true };
   } catch (e) {
     return { ok: false, error: (e as Error).message };
   }

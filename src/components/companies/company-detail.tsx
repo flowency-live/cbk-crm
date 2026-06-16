@@ -10,16 +10,17 @@ import {
   MessageSquare,
   Calendar,
   RefreshCw,
-  Plus,
 } from "lucide-react";
 import {
   STATUS_META,
   type Activity,
+  type ActivityType,
   type Contact,
   type Note,
   type Organization,
 } from "@/lib/types";
 import { cn, formatDate, initials, timeAgo } from "@/lib/utils";
+import { addActivity, addNote } from "@/lib/actions/companies";
 
 const TABS = ["Overview", "Contacts", "Companies House", "Activities", "Notes"] as const;
 type Tab = (typeof TABS)[number];
@@ -120,8 +121,10 @@ export function CompanyDetail({
             syncMsg={syncMsg}
           />
         )}
-        {tab === "Activities" && <Activities activities={activities} />}
-        {tab === "Notes" && <Notes notes={notes} />}
+        {tab === "Activities" && (
+          <Activities orgId={org.id} activities={activities} />
+        )}
+        {tab === "Notes" && <Notes orgId={org.id} notes={notes} />}
       </div>
     </div>
   );
@@ -275,51 +278,161 @@ function CHRow({
   );
 }
 
-function Activities({ activities }: { activities: Activity[] }) {
-  if (!activities.length)
-    return <p className="text-sm text-muted">No activity logged yet.</p>;
-  const icon = {
-    call: Phone,
-    email: Mail,
-    meeting: Calendar,
-    task: MessageSquare,
-    note: MessageSquare,
-  };
+const ACTIVITY_ICON: Record<ActivityType, React.ComponentType<{ size?: number }>> = {
+  call: Phone,
+  email: Mail,
+  meeting: Calendar,
+  task: MessageSquare,
+  note: MessageSquare,
+};
+
+function Activities({
+  orgId,
+  activities,
+}: {
+  orgId: string;
+  activities: Activity[];
+}) {
+  const router = useRouter();
+  const [type, setType] = useState<ActivityType>("call");
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function save() {
+    if (!subject.trim()) return;
+    setSaving(true);
+    setErr(null);
+    const res = await addActivity(orgId, { type, subject, body });
+    setSaving(false);
+    if (res.ok) {
+      setSubject("");
+      setBody("");
+      router.refresh();
+    } else {
+      setErr(res.error ?? "Couldn't save.");
+    }
+  }
+
   return (
     <div>
-      {activities.map((a) => {
-        const Icon = icon[a.type] ?? MessageSquare;
-        return (
-          <div key={a.id} className="flex gap-3 border-b border-border py-3 last:border-0">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-accent-soft text-accent">
-              <Icon size={15} />
-            </div>
-            <div className="text-[13px]">
-              <b>{a.subject}</b>
-              {a.body ? ` — ${a.body}` : ""}
-              <div className="mt-0.5 text-[11.5px] capitalize text-muted">
-                {a.type} · {timeAgo(a.created_at)}
+      <div className="mb-5 rounded-md border border-border bg-surface p-3">
+        <div className="flex flex-wrap gap-2">
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value as ActivityType)}
+            className="rounded-md border border-border bg-background px-2.5 py-2 text-[13px] outline-none focus:border-primary"
+          >
+            <option value="call">Call</option>
+            <option value="email">Email</option>
+            <option value="meeting">Meeting</option>
+            <option value="task">Task</option>
+            <option value="note">Note</option>
+          </select>
+          <input
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder="Subject (e.g. Discussed Q2 VAT return)"
+            className="min-w-[200px] flex-1 rounded-md border border-border bg-background px-3 py-2 text-[13px] outline-none focus:border-primary"
+          />
+        </div>
+        <textarea
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          placeholder="Details (optional)"
+          rows={2}
+          className="mt-2 w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-[13px] outline-none placeholder:text-muted focus:border-primary"
+        />
+        <div className="mt-2 flex items-center justify-between">
+          {err ? <span className="text-[12px] text-danger">{err}</span> : <span />}
+          <button
+            onClick={save}
+            disabled={saving || !subject.trim()}
+            className="rounded-md bg-primary px-3.5 py-1.5 text-[13px] font-semibold text-primary-foreground hover:bg-primary-hover disabled:opacity-50"
+          >
+            {saving ? "Logging…" : "Log activity"}
+          </button>
+        </div>
+      </div>
+
+      {activities.length === 0 ? (
+        <p className="text-sm text-muted">No activity logged yet.</p>
+      ) : (
+        activities.map((a) => {
+          const Icon = ACTIVITY_ICON[a.type] ?? MessageSquare;
+          return (
+            <div key={a.id} className="flex gap-3 border-b border-border py-3 last:border-0">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-accent-soft text-accent">
+                <Icon size={15} />
+              </div>
+              <div className="text-[13px]">
+                <b>{a.subject}</b>
+                {a.body ? ` — ${a.body}` : ""}
+                <div className="mt-0.5 text-[11.5px] capitalize text-muted">
+                  {a.type} · {timeAgo(a.created_at)}
+                </div>
               </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })
+      )}
     </div>
   );
 }
 
-function Notes({ notes }: { notes: Note[] }) {
+function Notes({ orgId, notes }: { orgId: string; notes: Note[] }) {
+  const router = useRouter();
+  const [body, setBody] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function save() {
+    if (!body.trim()) return;
+    setSaving(true);
+    setErr(null);
+    const res = await addNote(orgId, body);
+    setSaving(false);
+    if (res.ok) {
+      setBody("");
+      router.refresh();
+    } else {
+      setErr(res.error ?? "Couldn't save.");
+    }
+  }
+
   return (
     <div>
-      {notes.map((n) => (
-        <div key={n.id} className="mb-2.5 rounded-md border border-border bg-surface p-3 text-[13px]">
-          {n.body}
-          <div className="mt-2 text-[11.5px] text-muted">{timeAgo(n.created_at)}</div>
+      <div className="mb-5 rounded-md border border-border bg-surface p-3">
+        <textarea
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          placeholder="Add a note…"
+          rows={3}
+          className="w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted"
+        />
+        <div className="mt-2 flex items-center justify-between">
+          {err ? <span className="text-[12px] text-danger">{err}</span> : <span />}
+          <button
+            onClick={save}
+            disabled={saving || !body.trim()}
+            className="rounded-md bg-primary px-3.5 py-1.5 text-[13px] font-semibold text-primary-foreground hover:bg-primary-hover disabled:opacity-50"
+          >
+            {saving ? "Saving…" : "Add note"}
+          </button>
         </div>
-      ))}
-      <button className="mt-2 inline-flex items-center gap-2 rounded-md border border-border px-3.5 py-2 text-[13px] font-medium hover:bg-surface">
-        <Plus size={15} /> Add note
-      </button>
+      </div>
+
+      {notes.length === 0 ? (
+        <p className="text-sm text-muted">No notes yet.</p>
+      ) : (
+        notes.map((n) => (
+          <div key={n.id} className="mb-2.5 rounded-md border border-border bg-surface p-3 text-[13px]">
+            {n.body}
+            <div className="mt-2 text-[11.5px] text-muted">{timeAgo(n.created_at)}</div>
+          </div>
+        ))
+      )}
     </div>
   );
 }
