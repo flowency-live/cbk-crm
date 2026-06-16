@@ -40,7 +40,6 @@ export default async function CompaniesPage({
         q={q}
         status={status}
         sector={sector}
-        total={demo ? rows.length : rows.length}
         showing={rows.length}
       />
 

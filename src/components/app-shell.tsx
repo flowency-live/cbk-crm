@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./theme-toggle";
 import { CommandPalette } from "./command-palette";
+import { Logo } from "./logo";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -30,8 +31,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid h-screen grid-cols-[230px_1fr] grid-rows-[60px_1fr] max-[820px]:grid-cols-[64px_1fr]">
       {/* Logo cell (row 1, col 1) */}
-      <div className="flex items-center gap-2.5 border-b border-r border-border px-4">
-        <BrandMark />
+      <div className="flex items-center gap-2.5 border-b border-r border-border px-3">
+        <Logo size={42} priority className="shrink-0" />
         <div className="font-brand text-base font-bold leading-none max-[820px]:hidden">
           Cheshire
           <span className="mt-0.5 block text-[8.5px] font-semibold tracking-[3px] text-muted">
@@ -106,15 +107,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="overflow-y-auto">{children}</main>
 
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
-    </div>
-  );
-}
-
-function BrandMark() {
-  return (
-    <div className="relative flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full border-2 border-foreground">
-      <span className="font-brand text-sm font-bold">C</span>
-      <span className="absolute right-[5px] top-[5px] h-[7px] w-[7px] rounded-full bg-primary" />
     </div>
   );
 }

@@ -23,7 +23,6 @@ export function CompanyFilters({
   q: string;
   status: string;
   sector: string;
-  total: number;
   showing: number;
 }) {
   const router = useRouter();

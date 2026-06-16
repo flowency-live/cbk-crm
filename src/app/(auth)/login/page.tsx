@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { Logo } from "@/components/logo";
 
 export default function LoginPage() {
   const configured =
@@ -22,7 +23,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/companies`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
         },
       });
       if (error) throw error;
@@ -37,17 +38,8 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm rounded-lg border border-border bg-elevated p-8 shadow-card">
-        <div className="mb-6 flex items-center gap-3">
-          <div className="relative flex h-10 w-10 items-center justify-center rounded-full border-2 border-foreground">
-            <span className="font-brand text-base font-bold">C</span>
-            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
-          </div>
-          <div className="font-brand text-lg font-bold leading-none">
-            Cheshire
-            <span className="mt-0.5 block text-[8.5px] font-semibold tracking-[3px] text-muted">
-              BOOKKEEPING
-            </span>
-          </div>
+        <div className="mb-6 flex flex-col items-center text-center">
+          <Logo size={96} priority />
         </div>
 
         <h1 className="font-brand text-xl font-bold">Sign in</h1>

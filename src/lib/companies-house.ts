@@ -52,15 +52,8 @@ export async function chSearch(query: string, limit = 10): Promise<CHSearchItem[
     { headers: { Authorization: authHeader() }, cache: "no-store" }
   );
   if (!res.ok) throw new Error(`Companies House search failed (${res.status})`);
-  const data = await res.json();
-  return (data.items ?? []).map((i: Record<string, unknown>) => ({
-    company_number: i.company_number,
-    title: i.title,
-    company_status: i.company_status,
-    company_type: i.company_type,
-    address_snippet: i.address_snippet,
-    date_of_creation: i.date_of_creation,
-  }));
+  const data = (await res.json()) as { items?: CHSearchItem[] };
+  return data.items ?? [];
 }
 
 export async function chProfile(number: string): Promise<CHProfile> {
@@ -69,7 +62,7 @@ export async function chProfile(number: string): Promise<CHProfile> {
     cache: "no-store",
   });
   if (!res.ok) throw new Error(`Companies House profile failed (${res.status})`);
-  return res.json();
+  return (await res.json()) as CHProfile;
 }
 
 export async function chOfficers(number: string): Promise<CHOfficer[]> {
@@ -78,12 +71,8 @@ export async function chOfficers(number: string): Promise<CHOfficer[]> {
     { headers: { Authorization: authHeader() }, cache: "no-store" }
   );
   if (!res.ok) return [];
-  const data = await res.json();
-  return (data.items ?? []).map((o: Record<string, unknown>) => ({
-    name: o.name,
-    officer_role: o.officer_role,
-    appointed_on: o.appointed_on,
-  }));
+  const data = (await res.json()) as { items?: CHOfficer[] };
+  return data.items ?? [];
 }
 
 /** Map a CH profile into our organization shape for the Add form. */
