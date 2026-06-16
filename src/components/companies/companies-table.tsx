@@ -149,7 +149,7 @@ export function CompaniesTable({ rows }: { rows: CompanyListRow[] }) {
 }
 
 function StatusBadge({ status }: { status: CompanyListRow["status"] }) {
-  const meta = STATUS_META[status];
+  const meta = STATUS_META[status] ?? { label: status ?? "Unknown", className: "bg-[#9993] text-muted" };
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11.5px] font-semibold ${meta.className}`}

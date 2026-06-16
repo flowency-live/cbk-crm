@@ -2,6 +2,7 @@
 // `supabase gen types typescript` output for full type-safety.
 
 export type CompanyStatus =
+  | "discovered"
   | "prospect"
   | "active_lead"
   | "client"
@@ -11,6 +12,7 @@ export type CompanyStatus =
 
 /** The statuses surfaced in the UI, in pipeline order. */
 export const STATUS_FLOW: CompanyStatus[] = [
+  "discovered",
   "prospect",
   "active_lead",
   "client",
@@ -108,6 +110,7 @@ export const STATUS_META: Record<
   CompanyStatus,
   { label: string; className: string }
 > = {
+  discovered: { label: "Discovered", className: "bg-[#6366f126] text-[#6366f1]" },
   prospect: { label: "Prospect", className: "bg-primary-soft text-primary" },
   active_lead: { label: "Active Lead", className: "bg-[#E0A75C26] text-warning" },
   client: { label: "Client", className: "bg-accent-soft text-accent" },
