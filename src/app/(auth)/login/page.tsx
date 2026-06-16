@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Logo } from "@/components/logo";
 
@@ -50,9 +51,9 @@ export default function LoginPage() {
         {!configured ? (
           <div className="rounded-md border border-accent bg-accent-soft px-3.5 py-3 text-[13px] text-accent">
             Supabase isn&apos;t configured yet. The app is running in demo mode —{" "}
-            <a href="/companies" className="font-semibold underline">
+            <Link href="/companies" className="font-semibold underline">
               continue to the demo
-            </a>
+            </Link>
             .
           </div>
         ) : sent ? (
