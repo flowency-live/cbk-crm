@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   Phone,
@@ -10,6 +10,7 @@ import {
   MessageSquare,
   Calendar,
   RefreshCw,
+  ChevronDown,
 } from "lucide-react";
 import {
   STATUS_META,
@@ -29,6 +30,7 @@ import {
   updateCompanyStatus,
   updateCompanyCategory,
 } from "@/lib/actions/companies";
+import { SelectMenu } from "@/components/ui/select-menu";
 
 const TABS = ["Overview", "Contacts", "Companies House", "Activities", "Notes"] as const;
 type Tab = (typeof TABS)[number];
@@ -138,10 +140,22 @@ function StatusSelect({
 }) {
   const router = useRouter();
   const [val, setVal] = useState<CompanyStatus>(value);
+  const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
   const meta = STATUS_META[val] ?? STATUS_META.prospect;
 
-  async function change(next: CompanyStatus) {
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  async function pick(next: CompanyStatus) {
+    setOpen(false);
+    if (next === val) return;
     const prev = val;
     setVal(next);
     setSaving(true);
@@ -152,28 +166,50 @@ function StatusSelect({
   }
 
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11.5px] font-semibold",
-        meta.className,
-        saving && "opacity-60"
-      )}
-    >
-      <span className="h-1.5 w-1.5 rounded-full bg-current" />
-      <select
-        value={val}
-        onChange={(e) => change(e.target.value as CompanyStatus)}
+    <div className="relative inline-block" ref={ref}>
+      <button
+        onClick={() => setOpen((o) => !o)}
         disabled={saving}
         aria-label="Change status"
-        className="cursor-pointer appearance-none bg-transparent pr-0.5 text-[11.5px] font-semibold text-current outline-none"
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11.5px] font-semibold transition hover:brightness-95",
+          meta.className,
+          saving && "opacity-60"
+        )}
       >
-        {STATUS_FLOW.map((s) => (
-          <option key={s} value={s}>
-            {STATUS_META[s].label}
-          </option>
-        ))}
-      </select>
-    </span>
+        <span className="h-1.5 w-1.5 rounded-full bg-current" />
+        {meta.label}
+        <ChevronDown size={13} className="opacity-70" />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-9 z-50 w-52 overflow-hidden rounded-lg border border-border bg-elevated p-1 shadow-card">
+          {STATUS_FLOW.map((s) => {
+            const m = STATUS_META[s];
+            return (
+              <button
+                key={s}
+                onClick={() => pick(s)}
+                className={cn(
+                  "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-surface",
+                  s === val && "bg-surface"
+                )}
+              >
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11.5px] font-semibold",
+                    m.className
+                  )}
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                  {m.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -199,19 +235,14 @@ function CategorySelect({
   }
 
   return (
-    <select
-      value={val}
-      onChange={(e) => change(e.target.value)}
-      disabled={saving}
-      aria-label="Change category"
-      className="rounded-md border border-border bg-surface px-2.5 py-1.5 text-sm font-medium outline-none focus:border-primary disabled:opacity-60"
-    >
-      {CATEGORIES.map((c) => (
-        <option key={c} value={c}>
-          {c}
-        </option>
-      ))}
-    </select>
+    <span className={saving ? "opacity-60" : undefined}>
+      <SelectMenu
+        options={CATEGORIES.map((c) => ({ value: c, label: c }))}
+        value={[val]}
+        onChange={(next) => change(next[0] ?? "Other")}
+        menuWidth="w-60"
+      />
+    </span>
   );
 }
 

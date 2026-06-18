@@ -23,14 +23,19 @@ export function isSupabaseConfigured() {
 
 export interface CompanyFilters {
   q?: string;
-  status?: string;
+  status?: string; // comma-separated list; empty = all
   category?: string;
+  fit?: string;
 }
 
 export async function getCompanies(
   filters: CompanyFilters = {}
 ): Promise<{ rows: CompanyListRow[]; demo: boolean }> {
-  const { q = "", status = "all", category = "all" } = filters;
+  const { q = "", status = "", category = "all", fit = "all" } = filters;
+  const statuses = status
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   let rows: CompanyListRow[];
   let demo = false;
@@ -51,9 +56,15 @@ export async function getCompanies(
   }
 
   const filtered = rows.filter((r) => {
-    const okStatus = status === "all" || r.status === status;
+    const okStatus = statuses.length === 0 || statuses.includes(r.status);
     const okCategory = category === "all" || r.category === category;
-    return okStatus && okCategory;
+    const fitVal =
+      r.enrichment && typeof r.enrichment === "object"
+        ? ((r.enrichment as Record<string, unknown>).fit as string | undefined)
+        : undefined;
+    const okFit =
+      fit === "all" || (fit === "unreviewed" ? !fitVal : fitVal === fit);
+    return okStatus && okCategory && okFit;
   });
 
   return { rows: filtered, demo };
