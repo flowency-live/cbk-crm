@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Plus, X, Zap, Pencil, Check, Loader2 } from "lucide-react";
 import { createCompany, type NewCompanyInput } from "@/lib/actions/companies";
-import type { CompanyStatus } from "@/lib/types";
+import { CATEGORIES, type CompanyStatus } from "@/lib/types";
 
 interface CHItem {
   company_number: string;
@@ -15,7 +15,11 @@ interface CHItem {
   date_of_creation?: string;
 }
 
-const EMPTY: NewCompanyInput = { name: "", status: "prospect" };
+const EMPTY: NewCompanyInput = {
+  name: "",
+  status: "prospect",
+  category: "Construction & Trades",
+};
 
 export function AddCompanyDialog() {
   const router = useRouter();
@@ -213,9 +217,22 @@ export function AddCompanyDialog() {
                     <FormField label="Status">
                       <select value={form.status} onChange={set("status")} className={inputCls}>
                         <option value="prospect">Prospect</option>
+                        <option value="active_lead">Active Lead</option>
                         <option value="client">Client</option>
-                        <option value="dormant">Dormant</option>
-                        <option value="lost">Lost</option>
+                        <option value="closed">Closed</option>
+                      </select>
+                    </FormField>
+                    <FormField label="Category">
+                      <select
+                        value={form.category ?? "Construction & Trades"}
+                        onChange={set("category")}
+                        className={inputCls}
+                      >
+                        {CATEGORIES.map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ))}
                       </select>
                     </FormField>
                     <FormField label="Primary contact">

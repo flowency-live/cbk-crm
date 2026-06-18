@@ -14,6 +14,7 @@ import {
 import {
   STATUS_META,
   STATUS_FLOW,
+  CATEGORIES,
   type Activity,
   type ActivityType,
   type CompanyStatus,
@@ -26,6 +27,7 @@ import {
   addActivity,
   addNote,
   updateCompanyStatus,
+  updateCompanyCategory,
 } from "@/lib/actions/companies";
 
 const TABS = ["Overview", "Contacts", "Companies House", "Activities", "Notes"] as const;
@@ -175,6 +177,44 @@ function StatusSelect({
   );
 }
 
+function CategorySelect({
+  orgId,
+  value,
+}: {
+  orgId: string;
+  value: string | null;
+}) {
+  const router = useRouter();
+  const [val, setVal] = useState<string>(value ?? "Other");
+  const [saving, setSaving] = useState(false);
+
+  async function change(next: string) {
+    const prev = val;
+    setVal(next);
+    setSaving(true);
+    const res = await updateCompanyCategory(orgId, next);
+    setSaving(false);
+    if (res.ok) router.refresh();
+    else setVal(prev);
+  }
+
+  return (
+    <select
+      value={val}
+      onChange={(e) => change(e.target.value)}
+      disabled={saving}
+      aria-label="Change category"
+      className="rounded-md border border-border bg-surface px-2.5 py-1.5 text-sm font-medium outline-none focus:border-primary disabled:opacity-60"
+    >
+      {CATEGORIES.map((c) => (
+        <option key={c} value={c}>
+          {c}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
@@ -194,7 +234,13 @@ function Overview({ org }: { org: Organization }) {
         <Field label="Type" value={org.company_type} />
         <Field label="Incorporated" value={formatDate(org.incorporated_on)} />
         <Field label="Phone" value={org.phone} />
-        <Field label="Sector" value={org.sector} />
+        <div>
+          <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted">
+            Category
+          </div>
+          <CategorySelect orgId={org.id} value={org.category} />
+        </div>
+        <Field label="Trade" value={org.sector} />
         <Field label="SIC code" value={org.sic_code} />
         <div className="col-span-2">
           <Field

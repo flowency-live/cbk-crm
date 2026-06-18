@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CATEGORIES } from "@/lib/types";
 
 const STATUSES = [
   { key: "all", label: "All" },
@@ -14,16 +15,14 @@ const STATUSES = [
 ];
 
 export function CompanyFilters({
-  sectors,
   q,
   status,
-  sector,
+  category,
   showing,
 }: {
-  sectors: string[];
   q: string;
   status: string;
-  sector: string;
+  category: string;
   showing: number;
 }) {
   const router = useRouter();
@@ -79,15 +78,15 @@ export function CompanyFilters({
       </div>
 
       <select
-        value={sector}
-        onChange={(e) => setParam("sector", e.target.value)}
-        aria-label="Filter by sector"
+        value={category}
+        onChange={(e) => setParam("category", e.target.value)}
+        aria-label="Filter by category"
         className="rounded-md border border-border bg-surface px-3 py-2 text-[13px] outline-none focus:border-primary"
       >
-        <option value="all">All sectors</option>
-        {sectors.map((s) => (
-          <option key={s} value={s}>
-            {s}
+        <option value="all">All categories</option>
+        {CATEGORIES.map((c) => (
+          <option key={c} value={c}>
+            {c}
           </option>
         ))}
       </select>

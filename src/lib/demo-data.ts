@@ -14,6 +14,7 @@ function org(p: Partial<CompanyListRow> & { id: string; name: string }): Company
     status: "prospect",
     sector: null,
     sic_code: null,
+    category: "Other",
     address_line1: null,
     address_line2: null,
     town: null,

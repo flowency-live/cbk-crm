@@ -69,9 +69,9 @@ export function CompaniesTable({ rows }: { rows: CompanyListRow[] }) {
         },
       },
       {
-        accessorKey: "sector",
-        header: "Sector",
-        cell: ({ row }) => row.original.sector ?? "—",
+        accessorKey: "category",
+        header: "Category",
+        cell: ({ row }) => row.original.category ?? "—",
       },
       {
         accessorKey: "status",

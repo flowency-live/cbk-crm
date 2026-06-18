@@ -7,7 +7,12 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(unzip:*)",
+      "Bash(node build.js:*)",
+      "Bash(dir:*)",
+      "Bash(npm install:*)",
+      "Bash(node optimize-images.js:*)"
     ]
   }
 }

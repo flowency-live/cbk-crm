@@ -30,6 +30,7 @@ export interface Organization {
   status: CompanyStatus;
   sector: string | null;
   sic_code: string | null;
+  category: string | null;
   address_line1: string | null;
   address_line2: string | null;
   town: string | null;
@@ -118,3 +119,61 @@ export const STATUS_META: Record<
   dormant: { label: "Dormant", className: "bg-[#9993] text-muted" },
   lost: { label: "Lost", className: "bg-[#9993] text-muted" },
 };
+
+// ---------- Backlog ----------
+export type BacklogStatus = "backlog" | "planned" | "in_progress" | "done";
+
+export interface BacklogItem {
+  id: string;
+  ref: string | null;
+  epic: string;
+  title: string;
+  description: string | null;
+  priority: string; // must | should | could | wont
+  phase: string; // phase_1 | phase_2 | phase_3
+  status: BacklogStatus;
+  automation: string | null; // none | assisted | autonomous | human_gate
+  effort: string | null;
+  impact: string | null;
+  sort_order: number;
+}
+
+export const BACKLOG_COLUMNS: { key: BacklogStatus; label: string }[] = [
+  { key: "backlog", label: "Backlog" },
+  { key: "planned", label: "Planned" },
+  { key: "in_progress", label: "In progress" },
+  { key: "done", label: "Done" },
+];
+
+export const PRIORITY_META: Record<string, { label: string; className: string }> = {
+  must: { label: "Must", className: "bg-[#C8553D26] text-danger" },
+  should: { label: "Should", className: "bg-primary-soft text-primary" },
+  could: { label: "Could", className: "bg-[#9993] text-muted" },
+  wont: { label: "Won't (v1)", className: "bg-[#9993] text-muted" },
+};
+
+export const AUTOMATION_META: Record<string, { label: string; className: string }> = {
+  autonomous: { label: "⚡ Autonomous", className: "bg-accent-soft text-accent" },
+  assisted: { label: "AI-assisted", className: "bg-primary-soft text-primary" },
+  human_gate: { label: "Human gate", className: "bg-[#E0A75C26] text-warning" },
+  none: { label: "Build", className: "bg-[#9993] text-muted" },
+};
+
+export const PHASE_META: Record<string, string> = {
+  phase_1: "Phase 1",
+  phase_2: "Phase 2",
+  phase_3: "Phase 3",
+};
+
+// ---------- Business category (user-friendly classification) ----------
+export const CATEGORIES = [
+  "Construction & Trades",
+  "Hospitality",
+  "Retail",
+  "Professional Services",
+  "Health & Wellbeing",
+  "Automotive",
+  "Property",
+  "Technology & Creative",
+  "Other",
+] as const;

@@ -24,13 +24,13 @@ export function isSupabaseConfigured() {
 export interface CompanyFilters {
   q?: string;
   status?: string;
-  sector?: string;
+  category?: string;
 }
 
 export async function getCompanies(
   filters: CompanyFilters = {}
-): Promise<{ rows: CompanyListRow[]; sectors: string[]; demo: boolean }> {
-  const { q = "", status = "all", sector = "all" } = filters;
+): Promise<{ rows: CompanyListRow[]; demo: boolean }> {
+  const { q = "", status = "all", category = "all" } = filters;
 
   let rows: CompanyListRow[];
   let demo = false;
@@ -50,21 +50,13 @@ export async function getCompanies(
     demo = true;
   }
 
-  const sectors = Array.from(
-    new Set(
-      (demo ? demoCompanies : rows)
-        .map((r) => r.sector)
-        .filter((s): s is string => !!s)
-    )
-  ).sort();
-
   const filtered = rows.filter((r) => {
     const okStatus = status === "all" || r.status === status;
-    const okSector = sector === "all" || r.sector === sector;
-    return okStatus && okSector;
+    const okCategory = category === "all" || r.category === category;
+    return okStatus && okCategory;
   });
 
-  return { rows: filtered, sectors, demo };
+  return { rows: filtered, demo };
 }
 
 function filterDemo(q: string): CompanyListRow[] {

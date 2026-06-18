@@ -16,6 +16,7 @@ export interface NewCompanyInput {
   company_number?: string;
   company_type?: string;
   status: CompanyStatus;
+  category?: string;
   sector?: string;
   sic_code?: string;
   town?: string;
@@ -56,6 +57,7 @@ export async function createCompany(
         company_number: clean(input.company_number),
         company_type: clean(input.company_type),
         status: input.status,
+        category: input.category || "Other",
         sector: clean(input.sector),
         sic_code: clean(input.sic_code),
         town: clean(input.town),
@@ -171,6 +173,27 @@ export async function updateCompanyStatus(
     const { error } = await supabase
       .from("organizations")
       .update({ status })
+      .eq("id", orgId);
+    if (error) return { ok: false, error: error.message };
+    revalidatePath(`/companies/${orgId}`);
+    revalidatePath("/companies");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
+export async function updateCompanyCategory(
+  orgId: string,
+  category: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!configured())
+    return { ok: false, error: "Demo mode — connect Supabase to save." };
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("organizations")
+      .update({ category })
       .eq("id", orgId);
     if (error) return { ok: false, error: error.message };
     revalidatePath(`/companies/${orgId}`);

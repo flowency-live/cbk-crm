@@ -9,14 +9,14 @@ export const dynamic = "force-dynamic";
 export default async function CompaniesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; status?: string; sector?: string }>;
+  searchParams: Promise<{ q?: string; status?: string; category?: string }>;
 }) {
   const sp = await searchParams;
   const q = sp.q ?? "";
   const status = sp.status ?? "all";
-  const sector = sp.sector ?? "all";
+  const category = sp.category ?? "all";
 
-  const { rows, sectors, demo } = await getCompanies({ q, status, sector });
+  const { rows, demo } = await getCompanies({ q, status, category });
 
   return (
     <div className="px-7 py-6">
@@ -36,10 +36,9 @@ export default async function CompaniesPage({
       )}
 
       <CompanyFilters
-        sectors={sectors}
         q={q}
         status={status}
-        sector={sector}
+        category={category}
         showing={rows.length}
       />
 

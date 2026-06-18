@@ -51,6 +51,7 @@ create table if not exists organizations (
   status            company_status not null default 'prospect',
   sector            text,
   sic_code          text,
+  category          text not null default 'Other',
   address_line1     text,
   address_line2     text,
   town              text,

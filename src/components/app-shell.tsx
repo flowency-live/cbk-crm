@@ -8,6 +8,7 @@ import {
   Building2,
   Users,
   CalendarDays,
+  ClipboardList,
   FileText,
   Bell,
   Search,
@@ -23,6 +24,7 @@ const NAV = [
   { href: "/companies", label: "Companies", icon: Building2 },
   { href: "/contacts", label: "Contacts", icon: Users },
   { href: "/activities", label: "Activities", icon: CalendarDays },
+  { href: "/backlog", label: "Backlog", icon: ClipboardList },
 ] as const;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
