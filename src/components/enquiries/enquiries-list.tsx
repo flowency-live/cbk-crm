@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Mail, Phone, ArrowRight, Ban, Check } from "lucide-react";
+import { Mail, Phone, ArrowRight, Ban, Check, Trash2 } from "lucide-react";
 import { ENQUIRY_STATUS_META, type WebsiteEnquiry } from "@/lib/types";
 import { cn, timeAgo } from "@/lib/utils";
-import { convertEnquiry, setEnquiryStatus } from "@/lib/actions/enquiries";
+import { convertEnquiry, setEnquiryStatus, deleteEnquiry } from "@/lib/actions/enquiries";
 
 export function EnquiriesList({ items }: { items: WebsiteEnquiry[] }) {
   if (!items.length) {
@@ -49,6 +49,15 @@ function EnquiryCard({ e }: { e: WebsiteEnquiry }) {
     setBusy(false);
     if (res.ok) router.refresh();
     else setErr(res.error ?? "Couldn't update.");
+  }
+  async function handleDelete() {
+    if (!confirm("Delete this enquiry permanently?")) return;
+    setBusy(true);
+    setErr(null);
+    const res = await deleteEnquiry(e.id);
+    setBusy(false);
+    if (res.ok) router.refresh();
+    else setErr(res.error ?? "Couldn't delete.");
   }
 
   return (
@@ -101,9 +110,17 @@ function EnquiryCard({ e }: { e: WebsiteEnquiry }) {
                 onClick={() => mark(e.status === "spam" ? "new" : "spam")}
                 disabled={busy}
                 title={e.status === "spam" ? "Restore" : "Mark as spam"}
-                className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-[13px] font-medium text-muted hover:bg-surface"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-[13px] font-medium text-muted hover:bg-surface disabled:opacity-50"
               >
                 <Ban size={14} /> {e.status === "spam" ? "Restore" : "Spam"}
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={busy}
+                title="Delete enquiry"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-[13px] font-medium text-danger hover:bg-surface disabled:opacity-50"
+              >
+                <Trash2 size={14} />
               </button>
             </>
           )}

@@ -102,3 +102,21 @@ export async function convertEnquiry(
     return { ok: false, error: (e as Error).message };
   }
 }
+
+export async function deleteEnquiry(
+  id: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!configured()) return { ok: false, error: "Demo mode." };
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("website_enquiries")
+      .delete()
+      .eq("id", id);
+    if (error) return { ok: false, error: error.message };
+    revalidatePath("/enquiries");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
