@@ -9,6 +9,7 @@ import {
   Users,
   CalendarDays,
   ClipboardList,
+  Inbox,
   FileText,
   Bell,
   Search,
@@ -18,16 +19,24 @@ import { ThemeToggle } from "./theme-toggle";
 import { CommandPalette } from "./command-palette";
 import { Logo } from "./logo";
 import { UserMenu } from "./user-menu";
+import { EnquiryNotification } from "./enquiry-notification";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/companies", label: "Companies", icon: Building2 },
   { href: "/contacts", label: "Contacts", icon: Users },
   { href: "/activities", label: "Activities", icon: CalendarDays },
+  { href: "/enquiries", label: "Enquiries", icon: Inbox },
   { href: "/backlog", label: "Backlog", icon: ClipboardList },
 ] as const;
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({
+  children,
+  enquiryCount = 0,
+}: {
+  children: React.ReactNode;
+  enquiryCount?: number;
+}) {
   const pathname = usePathname();
   const [paletteOpen, setPaletteOpen] = useState(false);
 
@@ -60,12 +69,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </button>
         <div className="ml-auto flex items-center gap-2">
           <ThemeToggle />
-          <button
-            className="flex h-9 w-9 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface hover:text-foreground"
+          <Link
+            href="/enquiries"
+            className={cn(
+              "relative flex h-9 w-9 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface hover:text-foreground",
+              enquiryCount > 0 && "text-primary"
+            )}
             aria-label="Notifications"
           >
-            <Bell size={19} />
-          </button>
+            <Bell size={19} className={cn(enquiryCount > 0 && "animate-pulse")} />
+            {enquiryCount > 0 && (
+              <span className="absolute right-0.5 top-0.5 flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+              </span>
+            )}
+          </Link>
           <UserMenu />
         </div>
       </header>
@@ -88,6 +107,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               )}
               <Icon size={18} className="shrink-0" />
               <span className="max-[820px]:hidden">{label}</span>
+              {href === "/enquiries" && enquiryCount > 0 && (
+                <span className="ml-auto rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground max-[820px]:hidden">
+                  {enquiryCount}
+                </span>
+              )}
             </Link>
           );
         })}
@@ -108,6 +132,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="overflow-y-auto">{children}</main>
 
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
+      <EnquiryNotification count={enquiryCount} />
     </div>
   );
 }

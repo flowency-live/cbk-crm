@@ -177,3 +177,28 @@ export const CATEGORIES = [
   "Technology & Creative",
   "Other",
 ] as const;
+
+// ---------- Website enquiries (contact-form inbox) ----------
+export interface WebsiteEnquiry {
+  id: string;
+  created_at: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  business_name: string | null;
+  service_interest: string | null;
+  message: string | null;
+  page_source: string | null;
+  status: string; // new | reviewed | converted | spam
+  converted_org_id: string | null;
+}
+
+export const ENQUIRY_STATUS_META: Record<
+  string,
+  { label: string; className: string }
+> = {
+  new: { label: "New", className: "bg-primary-soft text-primary" },
+  reviewed: { label: "Reviewed", className: "bg-[#E0A75C26] text-warning" },
+  converted: { label: "Converted", className: "bg-accent-soft text-accent" },
+  spam: { label: "Spam", className: "bg-[#9993] text-muted" },
+};

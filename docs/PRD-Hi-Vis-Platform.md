@@ -250,3 +250,53 @@ Representative Must-haves (Phase 1):
 ---
 
 *Sources for current integration/compliance facts are listed in the accompanying chat message.*
+
+---
+
+## Appendix A — Hi-Vis "site" status language
+
+The canonical statuses (§5) carry site-themed client-facing copy:
+
+| Status | Client-facing copy |
+|---|---|
+| 🟢 Submitted | On the site board — we've received it |
+| 🟡 Under Review | Our crew is checking it in the site office |
+| 🔴 Information Required | Halted on site — we need something from you |
+| 🔵 Ready for Approval | Site inspection ready — waiting for your sign-off |
+| 🚧 In Progress | Active site work — being processed |
+| ✅ Completed | Job signed off & filed |
+
+## Appendix B — Service workflow definitions (template source)
+
+These are the stage/task definitions the workflow engine (E5) builds templates from. Each task carries owner (client/bookkeeper/ai), status and automation level per §6–§7.
+
+### B1 — Monthly Bookkeeping & MTD
+**New Client Setup:** welcome email/letter with AML paperwork, ID request, T&Cs, engagement letter → complete onboarding questionnaire → connect accounting software (Xero only currently) → add bank feeds → upload opening records → review completed.
+**Monthly Processing:** records requested → records received → transactions processed → bank accounts reconciled → queries raised (if required) → queries resolved → bookkeeping review completed.
+**Reporting & Compliance:** monthly management reports prepared → reports uploaded to portal for client approval → MTD submission prepared (when due) → MTD submission completed → month closed.
+
+### B2 — VAT Return Service
+**VAT Review:** VAT period opened → transactions reviewed → VAT treatment checked → VAT adjustments reviewed → VAT return prepared.
+**Client Approval:** VAT summary uploaded → approval requested → approval received.
+**Submission:** VAT return submitted to HMRC → submission confirmation received → VAT liability communicated → VAT period closed.
+
+### B3 — Bookkeeping Clean-Up Service
+**Initial Assessment:** records requested → records received → historical bookkeeping reviewed → issues identified → clean-up plan + quotation prepared → plan and quotation approved by client.
+**Correction Work:** transactions reviewed → bank reconciliations corrected → duplicate entries removed → missing transactions entered → VAT coding reviewed → control accounts checked.
+**Final Review:** accounts reconciled → errors corrected → clean-up review completed → summary report prepared → recommendations issued.
+
+### B4 — CIS Registration Service
+**Registration Preparation:** subcontractor information requested → received → UTR verified → business details reviewed → registration application prepared.
+**Submission:** CIS registration submitted → HMRC response monitored → registration confirmed.
+**Completion:** registration documents uploaded → CIS guidance provided → service completed.
+
+### B5 — CIS Compliance Review
+**Review Setup:** CIS records requested → received → compliance review started.
+**Compliance Checks:** CIS registration verified → subcontractor records reviewed → verification procedures checked → deductions reviewed → monthly returns reviewed → payment records reviewed.
+**Findings & Recommendations:** compliance issues identified → risk assessment completed → recommendations prepared → compliance report uploaded with follow-up actions → follow-up actions agreed.
+
+## Appendix C — Universal task actions
+
+Reusable action buttons surfaced throughout the portal, tied to task types:
+Upload Documents · Complete Questionnaire · Respond to Query · Approve Submission · View Report · Download Documents · Book a Call · Mark as Complete.
+
