@@ -31,25 +31,45 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isAuthRoute = path.startsWith("/login");
+  const isCrmLogin = path.startsWith("/login");
+  const isPortal = path === "/portal" || path.startsWith("/portal/");
+  const isPortalLogin = path === "/portal/login";
   const isPublicAsset =
     path.startsWith("/_next") ||
     path.startsWith("/auth") ||
     path.startsWith("/api/health") ||
+    path.startsWith("/brand") ||
     path === "/favicon.ico";
 
-  // If auth is configured and user is not signed in, push to login.
   const authConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (authConfigured && !user && !isAuthRoute && !isPublicAsset) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("next", path);
-    return NextResponse.redirect(url);
+  if (!authConfigured) return response;
+
+  // Not signed in: route to the right login (portal vs CRM staff).
+  if (!user) {
+    if (isPortal && !isPortalLogin) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/portal/login";
+      url.searchParams.set("next", path);
+      return NextResponse.redirect(url);
+    }
+    if (!isPortal && !isCrmLogin && !isPublicAsset) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("next", path);
+      return NextResponse.redirect(url);
+    }
+    return response;
   }
 
-  if (user && isAuthRoute) {
+  // Signed in: keep users off the login screens.
+  if (isCrmLogin) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
+  if (isPortalLogin) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/portal";
     return NextResponse.redirect(url);
   }
 

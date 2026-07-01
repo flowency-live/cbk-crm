@@ -8,10 +8,15 @@ import {
 } from "@/lib/demo-data";
 import type {
   Activity,
+  AmlCheck,
   CompanyListRow,
   Contact,
+  Deadline,
+  Job,
+  JobTask,
   Note,
   Organization,
+  Report,
 } from "@/lib/types";
 
 export function isSupabaseConfigured() {
@@ -97,6 +102,11 @@ export interface CompanyDetail {
   contacts: Contact[];
   activities: Activity[];
   notes: Note[];
+  jobs: Job[];
+  jobTasks: JobTask[];
+  reports: Report[];
+  deadlines: Deadline[];
+  amlChecks: AmlCheck[];
 }
 
 export async function getCompany(id: string): Promise<CompanyDetail | null> {
@@ -111,31 +121,68 @@ export async function getCompany(id: string): Promise<CompanyDetail | null> {
         .single();
       if (!org) throw new Error("not found");
 
-      const [{ data: contacts }, { data: activities }, { data: notes }] =
-        await Promise.all([
-          supabase
-            .from("contacts")
-            .select("*")
-            .eq("org_id", id)
-            .is("deleted_at", null)
-            .order("is_primary", { ascending: false }),
-          supabase
-            .from("activities")
-            .select("*")
-            .eq("org_id", id)
-            .order("created_at", { ascending: false }),
-          supabase
-            .from("notes")
-            .select("*")
-            .eq("org_id", id)
-            .order("created_at", { ascending: false }),
-        ]);
+      const [
+        { data: contacts },
+        { data: activities },
+        { data: notes },
+        { data: jobs },
+        { data: jobTasks },
+        { data: reports },
+        { data: deadlines },
+        { data: amlChecks },
+      ] = await Promise.all([
+        supabase
+          .from("contacts")
+          .select("*")
+          .eq("org_id", id)
+          .is("deleted_at", null)
+          .order("is_primary", { ascending: false }),
+        supabase
+          .from("activities")
+          .select("*")
+          .eq("org_id", id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("notes")
+          .select("*")
+          .eq("org_id", id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("jobs")
+          .select("*")
+          .eq("org_id", id)
+          .is("deleted_at", null)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("job_tasks")
+          .select("*")
+          .eq("org_id", id)
+          .order("sort_order", { ascending: true }),
+        supabase
+          .from("reports")
+          .select("*")
+          .eq("org_id", id)
+          .is("deleted_at", null)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("deadlines")
+          .select("*")
+          .eq("org_id", id)
+          .is("deleted_at", null)
+          .order("due_date", { ascending: true }),
+        supabase.from("aml_checks").select("*").eq("org_id", id),
+      ]);
 
       return {
         org: org as Organization,
         contacts: (contacts ?? []) as Contact[],
         activities: (activities ?? []) as Activity[],
         notes: (notes ?? []) as Note[],
+        jobs: (jobs ?? []) as Job[],
+        jobTasks: (jobTasks ?? []) as JobTask[],
+        reports: (reports ?? []) as Report[],
+        deadlines: (deadlines ?? []) as Deadline[],
+        amlChecks: (amlChecks ?? []) as AmlCheck[],
       };
     } catch {
       // fall through to demo
@@ -149,6 +196,11 @@ export async function getCompany(id: string): Promise<CompanyDetail | null> {
     contacts: demoContacts[id] ?? [],
     activities: demoActivities[id] ?? [],
     notes: demoNotes[id] ?? [],
+    jobs: [],
+    jobTasks: [],
+    reports: [],
+    deadlines: [],
+    amlChecks: [],
   };
 }
 

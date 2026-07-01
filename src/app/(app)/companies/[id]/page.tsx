@@ -19,6 +19,11 @@ export default async function CompanyPage({
       contacts={data.contacts}
       activities={data.activities}
       notes={data.notes}
+      jobs={data.jobs}
+      jobTasks={data.jobTasks}
+      reports={data.reports}
+      deadlines={data.deadlines}
+      amlChecks={data.amlChecks}
     />
   );
 }
