@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 type OAuthProvider = "google" | "apple";
@@ -28,6 +28,17 @@ export default function PortalLoginPage() {
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Show errors from auth callback (e.g., expired link)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlError = params.get("error");
+    if (urlError) {
+      setErr(decodeURIComponent(urlError));
+      // Clean URL
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
+
   async function sendMagicLink(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -40,7 +51,7 @@ export default function PortalLoginPage() {
         options: { emailRedirectTo: redirectTo(), shouldCreateUser: false },
       });
       if (error) throw error;
-      setMsg("Check your email for a secure sign-in link.");
+      setMsg("Check your email for a secure sign-in link. Open it in this browser.");
     } catch (e) {
       setErr((e as Error).message);
     } finally {

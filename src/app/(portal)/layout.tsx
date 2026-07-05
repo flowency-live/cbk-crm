@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { getActiveTenant } from "@/lib/portal/tenant";
 import { PortalNav } from "@/components/portal/portal-nav";
@@ -20,15 +21,20 @@ export default async function PortalLayout({
     "--brand-accent": theme.accent ?? "#3FA89B",
   } as unknown as CSSProperties;
 
+  const logoUrl = theme.logo_url ?? "/brand/hi-vis/logo.png";
+
   return (
     <div style={brandVars} className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
           <Link href="/portal" className="flex items-center gap-3">
-            <span
-              className="inline-block h-7 w-7 rounded-lg"
-              style={{ background: "var(--brand-primary)" }}
-              aria-hidden
+            <Image
+              src={logoUrl}
+              alt={tenant.name}
+              width={36}
+              height={36}
+              className="rounded-lg"
+              priority
             />
             <span className="font-semibold">
               {theme.portal_name ?? tenant.name}

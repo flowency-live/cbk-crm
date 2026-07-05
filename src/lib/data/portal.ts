@@ -17,16 +17,18 @@ import type {
   Deadline,
 } from "@/lib/types";
 
-// Demo tenant for when Supabase is not configured
-const DEMO_TENANT: Tenant = {
+// Demo tenants for when Supabase is not configured
+const DEMO_TENANT_HIVIS: Tenant = {
   id: "a0000000-0000-4000-8000-000000000001",
   slug: "hi-vis",
   name: "The Hi Vis Bookkeeper",
+  domain: "hivisbooks.co.uk",
   theme: {
     logo_url: "/brand/hi-vis/logo.png",
-    primary: "#FACC15",
-    ink: "#1C1C1C",
-    accent: "#3FA89B",
+    primary: "#E3A22E",
+    ink: "#23262b",
+    accent: "#2F8A7B",
+    secondary: "#A88BBA",
     portal_name: "The Hi Vis Bookkeeper",
   },
   support_email: "hello@hivisbooks.co.uk",
@@ -34,6 +36,27 @@ const DEMO_TENANT: Tenant = {
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
 };
+
+const DEMO_TENANT_CHESHIRE: Tenant = {
+  id: "a0000000-0000-4000-8000-000000000002",
+  slug: "cheshire",
+  name: "Cheshire Bookkeeping",
+  domain: "cheshirebookkeeping.co.uk",
+  theme: {
+    logo_url: "/brand/cheshire/logo.png",
+    primary: "#5FC2B4",
+    ink: "#1C1C1C",
+    accent: "#C3A9DE",
+    portal_name: "Cheshire Bookkeeping Client Portal",
+  },
+  support_email: "hello@cheshirebookkeeping.co.uk",
+  status: "active",
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
+
+// Default to Hi-Vis for backwards compatibility
+const DEMO_TENANT = DEMO_TENANT_HIVIS;
 
 /**
  * Fetches the portal_user row for the currently authenticated user.
@@ -101,6 +124,38 @@ export async function getDefaultTenant(): Promise<Tenant> {
     return data as Tenant;
   } catch {
     return DEMO_TENANT;
+  }
+}
+
+/**
+ * Fetches a tenant by domain. Used for hostname-based brand resolution.
+ * Matches against the `domain` column (e.g., "hivisbooks.co.uk").
+ */
+export async function getTenantByDomain(domain: string): Promise<Tenant | null> {
+  // Demo mode: match against demo tenants
+  if (!isSupabaseConfigured()) {
+    if (domain.includes("hivisbooks") || domain.includes("hi-vis")) {
+      return DEMO_TENANT_HIVIS;
+    }
+    if (domain.includes("cheshire")) {
+      return DEMO_TENANT_CHESHIRE;
+    }
+    return null;
+  }
+
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("tenants")
+      .select("*")
+      .eq("domain", domain)
+      .eq("status", "active")
+      .single();
+
+    if (error || !data) return null;
+    return data as Tenant;
+  } catch {
+    return null;
   }
 }
 

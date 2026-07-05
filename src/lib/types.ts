@@ -217,11 +217,13 @@ export interface Tenant {
   id: string;
   slug: string;
   name: string;
+  domain: string | null;
   theme: {
     logo_url?: string;
     primary?: string;
     ink?: string;
     accent?: string;
+    secondary?: string;
     portal_name?: string;
   };
   support_email: string | null;
