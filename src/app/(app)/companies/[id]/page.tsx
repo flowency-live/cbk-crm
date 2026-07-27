@@ -24,6 +24,8 @@ export default async function CompanyPage({
       reports={data.reports}
       deadlines={data.deadlines}
       amlChecks={data.amlChecks}
+      messages={data.messages}
+      portalUsers={data.portalUsers}
     />
   );
 }

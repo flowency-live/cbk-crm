@@ -1,0 +1,322 @@
+/* ============================================================
+   Portal shell — ported from the hivisbooks.co.uk design system
+   so the portal reads as an extension of the public website.
+   Brand values are CSS vars so tenants can reskin via DB theme.
+   ============================================================ */
+@import url("https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Inter:wght@400;500;600;700;800;900&display=swap");
+
+.portal-shell {
+  /* Website palette (Hi Vis defaults — overridden per-tenant inline) */
+  --hv-yellow: #e3a22e;
+  --hv-yellow-deep: #c9871a;
+  --hv-teal-dark: #1e4d45;
+  --hv-teal: #2f8a7b;
+  --hv-teal-soft: #9fd3c7;
+  --hv-lilac: #a88bba;
+  --hv-purple-deep: #6e4f84;
+  --hv-ink: #23262b;
+  --hv-muted: #5f636a;
+  --hv-line: #ece8e2;
+  --hv-paper: #fbfaf8;
+
+  /* Remap the app's Tailwind tokens inside the portal so existing
+     page components pick up the website look without edits */
+  --background: var(--hv-paper);
+  --surface: #ffffff;
+  --elevated: #ffffff;
+  --border: var(--hv-line);
+  --foreground: var(--hv-ink);
+  --muted: var(--hv-muted);
+  --accent: var(--hv-teal);
+  --accent-soft: rgba(47, 138, 123, 0.1);
+  --ring: var(--hv-teal);
+  --brand-primary: var(--hv-yellow);
+  --brand-ink: var(--hv-ink);
+  --brand-accent: var(--hv-teal);
+
+  font-family: "Inter", system-ui, sans-serif;
+  color: var(--hv-ink);
+  background: var(--hv-paper);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.portal-shell .marker {
+  font-family: "Permanent Marker", cursive;
+  font-weight: 400;
+  letter-spacing: 0.4px;
+  line-height: 1.05;
+}
+
+.portal-shell .wrap {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 26px;
+  width: 100%;
+}
+
+/* Brushbar accent strip (site signature) */
+.portal-shell .brushbar {
+  height: 7px;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--hv-teal-dark) 0 12px,
+    var(--hv-lilac) 12px 24px,
+    var(--hv-yellow) 24px 36px,
+    var(--hv-purple-deep) 36px 48px
+  );
+}
+
+/* ---------- Buttons (site style) ---------- */
+.portal-shell .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 14px;
+  padding: 13px 24px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-family: "Inter", sans-serif;
+}
+.portal-shell .btn-yellow {
+  background: var(--hv-yellow);
+  color: var(--hv-ink);
+  box-shadow: 0 5px 0 var(--hv-yellow-deep);
+}
+.portal-shell .btn-yellow:hover {
+  box-shadow: 0 7px 0 var(--hv-yellow-deep);
+}
+.portal-shell .btn-yellow:active {
+  transform: translateY(2px);
+  box-shadow: 0 3px 0 var(--hv-yellow-deep);
+}
+.portal-shell .btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* ---------- Header (mirror of the website header) ---------- */
+.portal-shell header.site {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--hv-line);
+}
+.portal-shell header.site nav {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 90px;
+}
+.portal-shell .brand {
+  display: flex;
+  align-items: center;
+}
+.portal-shell .brand img {
+  height: 72px;
+  width: auto;
+}
+.portal-shell .nav-links {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.portal-shell .nav-links a {
+  color: var(--hv-teal-dark);
+  font-weight: 700;
+  font-size: 14.5px;
+  transition: color 0.12s;
+  text-decoration: none;
+}
+.portal-shell .nav-links a:hover,
+.portal-shell .nav-links a.active {
+  color: var(--hv-purple-deep);
+}
+.portal-shell .nav-links a.active {
+  text-decoration: underline;
+  text-decoration-color: var(--hv-yellow);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 8px;
+}
+.portal-shell .nav-links .btn-yellow {
+  color: var(--hv-ink);
+  padding: 10px 18px;
+}
+.portal-shell .nav-toggle {
+  display: none;
+  margin-left: auto;
+  background: none;
+  border: 0;
+  color: var(--hv-teal-dark);
+  font-size: 26px;
+  cursor: pointer;
+}
+
+/* ---------- Page heading style ---------- */
+.portal-shell .page-title {
+  font-family: "Permanent Marker", cursive;
+  font-weight: 400;
+  font-size: clamp(26px, 4vw, 34px);
+  color: var(--hv-teal-dark);
+  line-height: 1.1;
+}
+.portal-shell .page-sub {
+  color: var(--hv-muted);
+  font-size: 15px;
+  margin-top: 4px;
+}
+
+/* ---------- Cards get the site's warmth ---------- */
+.portal-shell main section,
+.portal-shell main form.rounded-xl {
+  box-shadow: 0 1px 2px rgba(30, 77, 69, 0.05), 0 10px 30px rgba(30, 77, 69, 0.06);
+}
+
+/* ---------- Footer (mirror of the website footer) ---------- */
+.portal-shell footer.site {
+  background: #16211e;
+  color: #cfdbd7;
+  padding: 44px 0 26px;
+  margin-top: auto;
+}
+.portal-shell footer.site .foot-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 34px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+.portal-shell footer.site .f-logo img {
+  height: 80px;
+  width: auto;
+}
+.portal-shell footer.site p.blurb {
+  color: #aebfba;
+  font-size: 14px;
+  max-width: 320px;
+  margin-top: 14px;
+}
+.portal-shell footer.site h4 {
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  margin-bottom: 14px;
+  font-size: 15px;
+  text-transform: uppercase;
+}
+.portal-shell footer.site a.fl {
+  display: block;
+  color: #b6c5c0;
+  font-size: 14px;
+  margin-bottom: 9px;
+  text-decoration: none;
+}
+.portal-shell footer.site a.fl:hover {
+  color: var(--hv-yellow);
+}
+.portal-shell footer.site .foot-tags {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.portal-shell footer.site .foot-tags span {
+  background: var(--hv-purple-deep);
+  padding: 5px 12px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 12px;
+  color: #fff;
+}
+.portal-shell footer.site .foot-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 20px;
+  font-size: 13px;
+  color: #a7b6b1;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.portal-shell footer.site .foot-legal {
+  display: flex;
+  gap: 18px;
+}
+.portal-shell footer.site .foot-legal a {
+  color: #a7b6b1;
+  text-decoration: none;
+}
+.portal-shell footer.site .foot-legal a:hover {
+  color: var(--hv-yellow);
+}
+
+/* ---------- Sign-in form (site modal styling) ---------- */
+.portal-shell .field-label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--hv-teal-dark);
+  display: block;
+  margin: 0 0 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.portal-shell .field-input {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1.5px solid #d9d5cd;
+  border-radius: 11px;
+  font-size: 16px; /* ≥16px stops iOS zoom-on-focus */
+  font-family: inherit;
+  color: var(--hv-ink);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+.portal-shell .field-input:focus {
+  border-color: var(--hv-teal);
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 920px) {
+  .portal-shell header.site nav {
+    height: 78px;
+  }
+  .portal-shell .brand img {
+    height: 58px;
+  }
+  .portal-shell .nav-links {
+    display: none;
+    position: absolute;
+    top: 78px;
+    left: 0;
+    right: 0;
+    background: #fff;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 18px 26px;
+    gap: 14px;
+    border-bottom: 3px solid var(--hv-lilac);
+  }
+  .portal-shell .nav-links.open {
+    display: flex;
+  }
+  .portal-shell .nav-toggle {
+    display: block;
+  }
+  .portal-shell footer.site .foot-grid {
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+}

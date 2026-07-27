@@ -34,10 +34,22 @@ async function requireStaff() {
  * Staff-only. Creates the auth user (if new), forces a `client` profile, and
  * links a tenant-scoped portal_users row. Idempotent on re-invite.
  */
+/** Accepts "07700 900123", "+447700900123", "0044…" — returns E.164 or null. */
+function normaliseUkPhone(raw: string): string | null {
+  const digits = raw.replace(/[\s\-().]/g, "");
+  if (/^\+44\d{10}$/.test(digits)) return digits;
+  if (/^0044\d{10}$/.test(digits)) return `+44${digits.slice(4)}`;
+  if (/^07\d{9}$/.test(digits)) return `+44${digits.slice(1)}`;
+  if (/^\+\d{8,15}$/.test(digits)) return digits;
+  return null;
+}
+
 export async function inviteClientToPortal(input: {
   orgId: string;
   email: string;
   contactId?: string;
+  /** Mobile number to register on the auth user so SMS-code sign-in works. */
+  phone?: string;
 }): Promise<{ ok: boolean; error?: string }> {
   if (!configured()) return { ok: false, error: "Demo mode." };
   const gate = await requireStaff();
@@ -78,6 +90,18 @@ export async function inviteClientToPortal(input: {
     authUserId = invited?.user?.id ?? null;
   }
   if (!authUserId) return { ok: false, error: "Could not provision user." };
+
+  // Register the mobile number on the auth user (pre-confirmed) so the client
+  // can sign in with an SMS code as well as the email link. Non-fatal on error.
+  if (input.phone) {
+    const e164 = normaliseUkPhone(input.phone);
+    if (e164) {
+      await svc.auth.admin.updateUserById(authUserId, {
+        phone: e164,
+        phone_confirm: true,
+      });
+    }
+  }
 
   // Force a client profile so auth_role() is 'client', not the staff fallback.
   await svc

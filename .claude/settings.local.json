@@ -27,7 +27,15 @@
       "Bash(powershell:*)",
       "Bash(wc:*)",
       "Bash(find:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(ls:*)",
+      "Bash(tree:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npx vercel domains add:*)",
+      "mcp__claude_ai_Supabase__execute_sql",
+      "mcp__claude_ai_Supabase__apply_migration",
+      "Bash(npm run lint:*)",
+      "Bash(git rm:*)"
     ]
   }
 }

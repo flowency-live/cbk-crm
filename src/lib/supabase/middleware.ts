@@ -73,5 +73,22 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Role gate: signed-in clients don't get the CRM shell (data is already
+  // RLS-protected — this keeps the experience clean). Staff pass through.
+  if (!isPortal && !isPublicAsset) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    const role = profile?.role as string | undefined;
+    if (role && !["admin", "staff", "agent"].includes(role)) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/portal";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+  }
+
   return response;
 }

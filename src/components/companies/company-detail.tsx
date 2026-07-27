@@ -39,6 +39,7 @@ import {
   type Job,
   type JobTask,
   type JobTaskStatus,
+  type Message,
   type Note,
   type Organization,
   type Report,
@@ -58,9 +59,10 @@ import { instantiateWorkflow, updateJobTaskStatus } from "@/lib/actions/workflow
 import { uploadReport } from "@/lib/actions/reports";
 import { createDeadline, completeDeadline } from "@/lib/actions/deadlines";
 import { createAmlCheck, recordAmlDecision } from "@/lib/actions/aml";
+import { sendStaffMessage } from "@/lib/actions/messages";
 import { SelectMenu } from "@/components/ui/select-menu";
 
-const TABS = ["Overview", "Contacts", "Jobs", "Reports", "Deadlines", "AML", "Companies House", "Activities", "Notes"] as const;
+const TABS = ["Overview", "Contacts", "Jobs", "Messages", "Reports", "Deadlines", "AML", "Companies House", "Activities", "Notes"] as const;
 type Tab = (typeof TABS)[number];
 
 const WORKFLOW_TEMPLATES = [
@@ -70,6 +72,11 @@ const WORKFLOW_TEMPLATES = [
   { key: "cis_registration", label: "CIS Registration (11 tasks)" },
   { key: "cis_compliance", label: "CIS Compliance (14 tasks)" },
 ];
+
+export interface PortalUserLite {
+  contact_id: string | null;
+  created_at: string;
+}
 
 export function CompanyDetail({
   org,
@@ -81,6 +88,8 @@ export function CompanyDetail({
   reports,
   deadlines,
   amlChecks,
+  messages = [],
+  portalUsers = [],
 }: {
   org: Organization;
   contacts: Contact[];
@@ -91,6 +100,8 @@ export function CompanyDetail({
   reports: Report[];
   deadlines: Deadline[];
   amlChecks: AmlCheck[];
+  messages?: Message[];
+  portalUsers?: PortalUserLite[];
 }) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("Overview");
@@ -158,8 +169,11 @@ export function CompanyDetail({
 
       <div className="max-w-3xl">
         {tab === "Overview" && <Overview org={org} />}
-        {tab === "Contacts" && <People orgId={org.id} contacts={contacts} />}
+        {tab === "Contacts" && (
+          <People orgId={org.id} contacts={contacts} portalUsers={portalUsers} />
+        )}
         {tab === "Jobs" && <Jobs orgId={org.id} jobs={jobs} jobTasks={jobTasks} />}
+        {tab === "Messages" && <MessagesPanel orgId={org.id} messages={messages} />}
         {tab === "Reports" && <Reports orgId={org.id} reports={reports} jobs={jobs} />}
         {tab === "Deadlines" && <Deadlines orgId={org.id} deadlines={deadlines} />}
         {tab === "AML" && <AmlPanel orgId={org.id} amlChecks={amlChecks} />}
@@ -336,18 +350,37 @@ function Overview({ org }: { org: Organization }) {
   );
 }
 
-function People({ orgId, contacts }: { orgId: string; contacts: Contact[] }) {
+function People({
+  orgId,
+  contacts,
+  portalUsers,
+}: {
+  orgId: string;
+  contacts: Contact[];
+  portalUsers: PortalUserLite[];
+}) {
   const router = useRouter();
   const [inviting, setInviting] = useState<string | null>(null);
   const [inviteMsg, setInviteMsg] = useState<Record<string, string>>({});
+  const portalContactIds = new Set(
+    portalUsers.map((p) => p.contact_id).filter(Boolean) as string[]
+  );
 
-  async function invite(contactId: string, email: string) {
+  async function invite(contactId: string, email: string, phone: string | null) {
     setInviting(contactId);
     setInviteMsg((m) => ({ ...m, [contactId]: "" }));
-    const res = await inviteClientToPortal({ orgId, email, contactId });
+    const res = await inviteClientToPortal({
+      orgId,
+      email,
+      contactId,
+      phone: phone ?? undefined,
+    });
     setInviting(null);
     if (res.ok) {
-      setInviteMsg((m) => ({ ...m, [contactId]: "Invited!" }));
+      setInviteMsg((m) => ({
+        ...m,
+        [contactId]: phone ? "Invited! (email link + SMS sign-in enabled)" : "Invited! (email link)",
+      }));
       router.refresh();
     } else {
       setInviteMsg((m) => ({ ...m, [contactId]: res.error ?? "Failed" }));
@@ -381,19 +414,34 @@ function People({ orgId, contacts }: { orgId: string; contacts: Contact[] }) {
           </div>
           <div className="flex items-center gap-2">
             {inviteMsg[c.id] && (
-              <span className={cn("text-[11px]", inviteMsg[c.id] === "Invited!" ? "text-accent" : "text-danger")}>
+              <span className={cn("text-[11px]", inviteMsg[c.id].startsWith("Invited!") ? "text-accent" : "text-danger")}>
                 {inviteMsg[c.id]}
+              </span>
+            )}
+            {portalContactIds.has(c.id) && (
+              <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[10px] font-bold uppercase text-accent">
+                Portal enabled
               </span>
             )}
             {c.email && (
               <button
-                onClick={() => invite(c.id, c.email!)}
+                onClick={() => invite(c.id, c.email!, c.phone)}
                 disabled={inviting === c.id}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-[11px] font-medium hover:border-primary disabled:opacity-50"
-                title="Invite to client portal"
+                title={
+                  portalContactIds.has(c.id)
+                    ? "Re-send the sign-in link"
+                    : c.phone
+                      ? "Invite to client portal (email link + SMS sign-in)"
+                      : "Invite to client portal — add a mobile number to enable SMS sign-in"
+                }
               >
                 <UserPlus size={13} />
-                {inviting === c.id ? "Inviting…" : "Invite to Portal"}
+                {inviting === c.id
+                  ? "Inviting…"
+                  : portalContactIds.has(c.id)
+                    ? "Re-send invite"
+                    : "Enable Portal"}
               </button>
             )}
           </div>
@@ -1369,6 +1417,74 @@ function AmlPanel({ orgId, amlChecks }: { orgId: string; amlChecks: AmlCheck[] }
           );
         })
       )}
+    </div>
+  );
+}
+
+function MessagesPanel({ orgId, messages }: { orgId: string; messages: Message[] }) {
+  const router = useRouter();
+  const [body, setBody] = useState("");
+  const [sending, setSending] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function send(e: React.FormEvent) {
+    e.preventDefault();
+    if (!body.trim()) return;
+    setSending(true);
+    setErr(null);
+    const res = await sendStaffMessage(orgId, body);
+    setSending(false);
+    if (res.ok) {
+      setBody("");
+      router.refresh();
+    } else {
+      setErr(res.error ?? "Couldn't send.");
+    }
+  }
+
+  return (
+    <div>
+      <SectionTitle>Messages ({messages.length})</SectionTitle>
+      <div className="mb-4 max-h-[420px] space-y-2 overflow-y-auto rounded-md border border-border bg-surface p-3">
+        {messages.length === 0 ? (
+          <p className="p-2 text-sm text-muted">
+            No messages yet. Anything you send appears in the client&apos;s portal.
+          </p>
+        ) : (
+          messages.map((m) => (
+            <div
+              key={m.id}
+              className={cn(
+                "max-w-[85%] rounded-lg px-3 py-2 text-sm",
+                m.sender_role === "staff"
+                  ? "ml-auto bg-primary-soft"
+                  : "bg-elevated border border-border"
+              )}
+            >
+              <div className="mb-0.5 text-[10px] font-semibold uppercase text-muted">
+                {m.sender_role === "staff" ? "You (staff)" : "Client"} · {timeAgo(m.created_at)}
+              </div>
+              {m.body}
+            </div>
+          ))
+        )}
+      </div>
+      <form onSubmit={send} className="flex gap-2">
+        <input
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          placeholder="Message the client — they'll see it in their portal"
+          className="flex-1 rounded-md border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+        />
+        <button
+          type="submit"
+          disabled={sending || !body.trim()}
+          className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+        >
+          {sending ? "Sending…" : "Send"}
+        </button>
+      </form>
+      {err && <p className="mt-2 text-[12px] text-danger">{err}</p>}
     </div>
   );
 }

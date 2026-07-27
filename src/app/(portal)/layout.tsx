@@ -1,12 +1,15 @@
 import type { CSSProperties } from "react";
-import Image from "next/image";
-import Link from "next/link";
 import { getActiveTenant } from "@/lib/portal/tenant";
-import { PortalNav } from "@/components/portal/portal-nav";
+import { createClient } from "@/lib/supabase/server";
+import { PortalHeader } from "@/components/portal/portal-header";
+import { PortalFooter } from "@/components/portal/portal-footer";
+import "./portal.css";
 
 /**
- * Branded shell for the client portal. Brand tokens come from the tenant record
- * (no hard-coded brand) and are exposed as CSS vars for the portal subtree.
+ * Website-look shell for the client portal. Mirrors the public site's
+ * header, footer, fonts and palette so the portal reads as an extension of
+ * the website. All brand values resolve from the tenant record — no
+ * hard-coded brand — with Hi Vis website defaults.
  */
 export default async function PortalLayout({
   children,
@@ -15,35 +18,51 @@ export default async function PortalLayout({
 }) {
   const tenant = await getActiveTenant();
   const theme = tenant.theme ?? {};
-  const brandVars = {
-    "--brand-primary": theme.primary ?? "#FACC15",
-    "--brand-ink": theme.ink ?? "#1C1C1C",
-    "--brand-accent": theme.accent ?? "#3FA89B",
-  } as unknown as CSSProperties;
 
-  const logoUrl = theme.logo_url ?? "/brand/hi-vis/logo.png";
+  // Tenant overrides for the website palette (Hi Vis values are the CSS defaults)
+  const brandVars: Record<string, string> = {};
+  if (theme.primary) brandVars["--hv-yellow"] = theme.primary;
+  if (theme.ink) brandVars["--hv-ink"] = theme.ink;
+  if (theme.accent) brandVars["--hv-teal"] = theme.accent;
+  if (theme.secondary) brandVars["--hv-teal-dark"] = theme.secondary;
+
+  const brandName = theme.portal_name ?? tenant.name;
+  const logoUrl = theme.logo_url ?? "/brand/hi-vis/logo-wordmark.png";
+  const footerLogoUrl =
+    tenant.slug === "hi-vis" ? "/brand/hi-vis/footer-logo.png" : theme.logo_url ?? null;
+  const websiteUrl = tenant.domain
+    ? `https://www.${tenant.domain}`
+    : "https://www.hivisbooks.co.uk";
+  const supportEmail = tenant.support_email ?? "hello@hivisbooks.co.uk";
+
+  // Signed-in state decides whether the nav renders
+  let signedIn = false;
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    signedIn = !!user;
+  }
 
   return (
-    <div style={brandVars} className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
-          <Link href="/portal" className="flex items-center gap-3">
-            <Image
-              src={logoUrl}
-              alt={tenant.name}
-              width={36}
-              height={36}
-              className="rounded-lg"
-              priority
-            />
-            <span className="font-semibold">
-              {theme.portal_name ?? tenant.name}
-            </span>
-          </Link>
-        </div>
-        <PortalNav />
-      </header>
-      <main className="mx-auto max-w-3xl px-4 py-8">{children}</main>
+    <div className="portal-shell" style={brandVars as CSSProperties}>
+      <div className="brushbar" />
+      <PortalHeader
+        logoUrl={logoUrl}
+        brandName={brandName}
+        websiteUrl={websiteUrl}
+        signedIn={signedIn}
+      />
+      <main className="wrap" style={{ maxWidth: 860, paddingTop: 36, paddingBottom: 56 }}>
+        {children}
+      </main>
+      <PortalFooter
+        brandName={brandName}
+        websiteUrl={websiteUrl}
+        supportEmail={supportEmail}
+        footerLogoUrl={footerLogoUrl}
+      />
     </div>
   );
 }

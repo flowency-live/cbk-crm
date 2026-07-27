@@ -14,6 +14,7 @@ import type {
   Deadline,
   Job,
   JobTask,
+  Message,
   Note,
   Organization,
   Report,
@@ -107,6 +108,8 @@ export interface CompanyDetail {
   reports: Report[];
   deadlines: Deadline[];
   amlChecks: AmlCheck[];
+  messages: Message[];
+  portalUsers: { contact_id: string | null; created_at: string }[];
 }
 
 export async function getCompany(id: string): Promise<CompanyDetail | null> {
@@ -130,6 +133,8 @@ export async function getCompany(id: string): Promise<CompanyDetail | null> {
         { data: reports },
         { data: deadlines },
         { data: amlChecks },
+        { data: messages },
+        { data: portalUsers },
       ] = await Promise.all([
         supabase
           .from("contacts")
@@ -171,6 +176,15 @@ export async function getCompany(id: string): Promise<CompanyDetail | null> {
           .is("deleted_at", null)
           .order("due_date", { ascending: true }),
         supabase.from("aml_checks").select("*").eq("org_id", id),
+        supabase
+          .from("messages")
+          .select("*")
+          .eq("org_id", id)
+          .order("created_at", { ascending: true }),
+        supabase
+          .from("portal_users")
+          .select("contact_id, created_at")
+          .eq("org_id", id),
       ]);
 
       return {
@@ -183,6 +197,8 @@ export async function getCompany(id: string): Promise<CompanyDetail | null> {
         reports: (reports ?? []) as Report[],
         deadlines: (deadlines ?? []) as Deadline[],
         amlChecks: (amlChecks ?? []) as AmlCheck[],
+        messages: (messages ?? []) as Message[],
+        portalUsers: (portalUsers ?? []) as { contact_id: string | null; created_at: string }[],
       };
     } catch {
       // fall through to demo
@@ -201,6 +217,8 @@ export async function getCompany(id: string): Promise<CompanyDetail | null> {
     reports: [],
     deadlines: [],
     amlChecks: [],
+    messages: [],
+    portalUsers: [],
   };
 }
 
